@@ -1,0 +1,57 @@
+# Detecta arquivos de texto e normaliza finais de linha no repositorio
+* text=auto
+
+# Codigo do projeto web
+*.php      text eol=lf
+*.phtml    text eol=lf
+*.html     text eol=lf
+*.htm      text eol=lf
+*.css      text eol=lf
+*.js       text eol=lf
+*.mjs      text eol=lf
+*.cjs      text eol=lf
+*.sql      text eol=lf
+
+# Documentacao e dados estruturados
+*.md       text eol=lf
+*.markdown text eol=lf
+*.txt      text eol=lf
+*.json     text eol=lf
+*.jsonc    text eol=lf
+*.xml      text eol=lf
+*.csv      text eol=lf
+
+# Arquivos de configuracao
+*.yml        text eol=lf
+*.yaml       text eol=lf
+*.ini        text eol=lf
+*.conf       text eol=lf
+*.config     text eol=lf
+*.env        text eol=lf
+.env.example text eol=lf
+.htaccess    text eol=lf
+.gitignore   text eol=lf
+.gitattributes text eol=lf
+composer.lock  text eol=lf
+
+# Scripts: Unix usa LF; scripts nativos do Windows usam CRLF
+*.sh       text eol=lf
+*.bash     text eol=lf
+*.bat      text eol=crlf
+*.cmd      text eol=crlf
+*.ps1      text eol=crlf
+
+# Arquivos binarios nao devem sofrer conversao de final de linha
+*.png      binary
+*.jpg      binary
+*.jpeg     binary
+*.gif      binary
+*.webp     binary
+*.ico      binary
+*.pdf      binary
+*.woff     binary
+*.woff2    binary
+*.ttf      binary
+*.eot      binary
+*.zip      binary
+*.gz       binary

@@ -1,0 +1,57 @@
+# Dependencias instaladas pelo Composer
+/vendor/
+
+# Variaveis de ambiente e credenciais locais
+.env
+.env.*
+!.env.example
+!.env.example.*
+/.env.local
+/config/local.php
+/config/*.local.php
+
+# Logs, cache, sessoes e arquivos temporarios da aplicacao/PHP
+/logs/
+/log/
+/cache/
+/tmp/
+/temp/
+/sessions/
+*.log
+*.cache
+*.tmp
+*.temp
+*.pid
+
+# Artefatos de testes e ferramentas PHP
+/.phpunit.cache/
+/.phpunit.result.cache
+/.php-cs-fixer.cache
+/.phpstan.cache/
+/coverage/
+
+# Configuracoes locais de editores e IDEs
+/.idea/
+/.vscode/
+/.fleet/
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# Arquivos gerados pelo sistema operacional
+.DS_Store
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Copias de seguranca e dumps locais
+*.bak
+*.backup
+*.orig
+*.local.sql
+*.sql.gz

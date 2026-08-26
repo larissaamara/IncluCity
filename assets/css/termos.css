@@ -1,0 +1,118 @@
+/* ===== BODY ===== */
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6f9;
+  margin: 0;
+  padding: 20px;
+}
+
+/* ===== CONTAINER ===== */
+.container-termos {
+  max-width: 800px;
+  margin: 40px auto;
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 15px;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* ===== TÍTULO ===== */
+h1 {
+  color: #0f517c;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.data {
+  text-align: center;
+  font-size: 13px;
+  color: #777;
+  margin-bottom: 25px;
+}
+
+/* ===== CONTEÚDO ===== */
+.conteudo-termos {
+  margin-bottom: 30px;
+}
+
+h2 {
+  color: #0f517c;
+  margin-top: 20px;
+  font-size: 18px;
+}
+
+p {
+  line-height: 1.7;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+ul {
+  padding-left: 20px;
+  margin-bottom: 15px;
+}
+
+li {
+  margin-bottom: 6px;
+}
+
+/* ===== ACEITE ===== */
+.aceite {
+  border-top: 1px solid #ddd;
+  padding-top: 20px;
+  text-align: center;
+}
+
+/* ===== BOTÕES ===== */
+.botoes {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+button {
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* aceitar */
+.btn-aceitar {
+  background: #0f517c;
+  color: white;
+}
+
+.btn-aceitar:hover {
+  background: #0c3e61;
+}
+
+/* cancelar */
+.btn-cancelar {
+  background: #ddd;
+}
+
+.btn-cancelar:hover {
+  background: #bbb;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+
+  .container-termos {
+    margin: 20px 10px;
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: 22px;
+  }
+
+  h2 {
+    font-size: 16px;
+  }
+
+}

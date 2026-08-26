@@ -1,0 +1,286 @@
+ /* From Uiverse.io by mahbowal */ 
+
+body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #bfd5ec;
+}
+
+.login-img{
+  height: 100px;
+  margin-left: 60px;
+  justify-items: center;
+  align-items: center;
+}
+
+.container {
+  max-width: 430px;
+  background: #0f517c;
+  background: linear-gradient(
+    0deg,
+    #ffffff 0%,
+    #dedfe0 100%
+  );
+  border-radius: 40px;
+  padding: 25px 35px;
+  border: 5px solid #2b2859;
+  box-shadow: #85bdd7e0 0px 30px 30px -20px;
+  margin: 20px;
+}
+
+.form {
+  margin-top: 20px;
+}
+
+.form .input {
+  width: 100%;
+  background: #8ca2b1;
+  border: none;
+  padding: 15px 20px;
+  border-radius: 20px;
+  margin-top: 15px;
+  box-shadow: #cff0ff 0px 10px 10px -5px;
+  border-inline: 2px solid transparent;
+}
+
+.form .input::-moz-placeholder {
+  color: #000000;
+}
+
+.form .input::placeholder {
+  color: #000000;
+
+}
+
+.form .input:focus {
+  outline: none;
+  border-inline: 2px solid #0f517c;
+}
+
+.form .forgot-password {
+  display: block;
+  margin-top: 10px;
+  margin-left: 10px;
+  
+}
+
+.form .forgot-password a {
+  font-size: 11px;
+  color: #000000;
+  text-decoration: none;
+}
+
+.form .login-button {
+  display: block;
+  width: 100%;
+  height: 9%;
+  font-weight: bold;
+  background: linear-gradient(
+    45deg,
+    #8ca2b1 -30%,
+    #0f517c 60%    
+  );
+  font-size: 27px;
+  color: #ffffff;
+  padding-block: 15px;
+  margin: 20px auto;
+  border-radius: 20px;
+  box-shadow: rgba(72, 121, 145, 0.878) 0px 20px 10px -15px;
+  border: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.form .login-button:hover {
+  transform: scale(1.03);
+  box-shadow: rgba(133, 189, 215, 0.8784313725) 0px 23px 10px -20px;
+}
+
+.form .login-button:active {
+  transform: scale(0.95);
+  box-shadow: rgba(133, 189, 215, 0.8784313725) 0px 15px 10px -10px;
+}
+
+.social-account-container {
+  margin-top: 20px;
+}
+
+.social-account-container .title {
+  display: block;
+  text-align: center;
+  font-size: 13px;
+  color: #4b5563;
+  font-weight: 600;
+}
+
+.social-account-container .social-accounts {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.social-account-container .social-accounts .social-button {
+  width: 100%;
+  min-height: 48px;
+  padding: 11px 18px;
+  border: 1px solid #c7cbd1;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #1f1f1f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: 0 3px 10px rgba(15, 81, 124, 0.12);
+  font-size: 15px;
+  font-weight: 600;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
+}
+
+.social-account-container .social-accounts .social-button .svg {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+}
+
+.social-account-container .social-accounts .social-button:hover {
+  border-color: #4285f4;
+  box-shadow: 0 6px 16px rgba(66, 133, 244, 0.2);
+  transform: translateY(-2px);
+}
+
+.social-account-container .social-accounts .social-button:active {
+  transform: translateY(0);
+}
+
+.social-account-container .social-accounts .social-button:focus-visible {
+  outline: 3px solid rgba(66, 133, 244, 0.35);
+  outline-offset: 2px;
+}
+
+.social-account-container .social-accounts .social-button.google {
+  width: 260px;
+  min-height: 58px;
+  padding: 14px 26px;
+  border-radius: 14px;
+  font-size: 18px;
+}
+
+.social-account-container .social-accounts .social-button.google .svg {
+  width: 28px;
+  height: 28px;
+}
+
+.social-button.google .google-text {
+  display: inline-block;
+  color: #202124;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+@media (max-width: 480px) {
+  .social-account-container .social-accounts .social-button.google {
+    width: 100%;
+  }
+}
+
+.agreement {
+  display: block;
+  text-align: center;
+  margin-top: 15px;
+}
+
+.agreement a {
+  text-decoration: none;
+  color: #000000;
+  font-size: 9px;
+}
+.form .input,
+.senha-container .input {
+  width: 100%;
+  background: #8ca2b1;
+  border: none;
+  padding: 15px 20px;
+  border-radius: 20px;
+  margin-top: 15px;
+  box-shadow: #cff0ff 0px 10px 10px -5px;
+  border-inline: 2px solid transparent;
+  color: #000000;
+  font-size: 15px;
+}
+
+.form .input::placeholder,
+.senha-container .input::placeholder {
+  color: #000000;
+}
+
+.form .input:focus,
+.senha-container .input:focus {
+  outline: none;
+  border-inline: 2px solid #0f517c;
+}
+
+.senha-container {
+  position: relative;
+  width: 100%;
+}
+
+.senha-container .input {
+  padding-right: 50px;
+}
+
+.toggle-senha {
+  position: absolute;
+  right: 16px;
+  top: 58%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 18px;
+  user-select: none;
+}
+/**/
+.agreement1 { /*Cadastrar-se*/
+   display: block;
+  text-align: center;
+  margin-top: 15px;
+  font-weight: bold;
+  
+}
+.agreement1 a { /*Cadastrar-se*/
+  text-decoration: none;
+  color: #000000;
+  font-size: 20px;
+}
+/**/
+.agreement2 { /*Esqueceu.senha*/
+  text-align: center;
+  margin-top: 15px;
+  font-weight: bold;
+
+}
+.agreement2 a { /*Esqueceu.senha*/
+  text-decoration: none;
+  color: #000000;
+  font-size: 13px;
+}
+.termos-container{
+  margin: 15px 0;
+  font-size: 14px;
+}
+.termos-container input{
+  margin-right:8px;
+  cursor: pointer;
+}
+.termos-container a{
+  color: #005fa3;
+  text-decoration: underline;
+
+}
+.termos-container label{
+  cursor: pointer;
+}
