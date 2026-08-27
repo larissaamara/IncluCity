@@ -94,30 +94,30 @@ WHERE `nome` = 'Igreja Comunidade Aberta (Demonstração)';
 -- Cada SELECT localiza o local pelo nome e evita cadastrar a mesma foto novamente.
 
 INSERT INTO `local_fotos` (`local_id`, `arquivo`)
-SELECT l.id, 'assets/uploads/solicitacoes/demo-cafe-inclusivo.png'
+SELECT l.id, 'assets/uploads/demonstracao/demo-cafe-inclusivo.png'
 FROM `locais` l
 WHERE l.nome = 'Café Inclusivo (Demonstração)'
   AND NOT EXISTS (
     SELECT 1 FROM `local_fotos` f
-    WHERE f.local_id = l.id AND f.arquivo = 'assets/uploads/solicitacoes/demo-cafe-inclusivo.png'
+    WHERE f.local_id = l.id AND f.arquivo = 'assets/uploads/demonstracao/demo-cafe-inclusivo.png'
   );
 
 INSERT INTO `local_fotos` (`local_id`, `arquivo`)
-SELECT l.id, 'assets/uploads/solicitacoes/demo-shopping-acessivel.png'
+SELECT l.id, 'assets/uploads/demonstracao/demo-shopping-acessivel.png'
 FROM `locais` l
 WHERE l.nome = 'Shopping Acessível (Demonstração)'
   AND NOT EXISTS (
     SELECT 1 FROM `local_fotos` f
-    WHERE f.local_id = l.id AND f.arquivo = 'assets/uploads/solicitacoes/demo-shopping-acessivel.png'
+    WHERE f.local_id = l.id AND f.arquivo = 'assets/uploads/demonstracao/demo-shopping-acessivel.png'
   );
 
 INSERT INTO `local_fotos` (`local_id`, `arquivo`)
-SELECT l.id, 'assets/uploads/solicitacoes/demo-centro-cultural.png'
+SELECT l.id, 'assets/uploads/demonstracao/demo-centro-cultural.png'
 FROM `locais` l
 WHERE l.nome = 'Centro Cultural para Todos (Demonstração)'
   AND NOT EXISTS (
     SELECT 1 FROM `local_fotos` f
-    WHERE f.local_id = l.id AND f.arquivo = 'assets/uploads/solicitacoes/demo-centro-cultural.png'
+    WHERE f.local_id = l.id AND f.arquivo = 'assets/uploads/demonstracao/demo-centro-cultural.png'
   );
 
 DELETE f FROM `local_fotos` f
@@ -125,12 +125,12 @@ INNER JOIN `locais` l ON l.id = f.local_id
 WHERE l.nome = 'Igreja Comunidade Aberta (Demonstração)';
 
 INSERT INTO `local_fotos` (`local_id`, `arquivo`)
-SELECT l.id, 'assets/uploads/solicitacoes/demo-instituto-cidadania.png'
+SELECT l.id, 'assets/uploads/demonstracao/demo-instituto-cidadania.png'
 FROM `locais` l
 WHERE l.nome = 'Instituto Cidadania (Demonstração)'
   AND NOT EXISTS (
     SELECT 1 FROM `local_fotos` f
-    WHERE f.local_id = l.id AND f.arquivo = 'assets/uploads/solicitacoes/demo-instituto-cidadania.png'
+    WHERE f.local_id = l.id AND f.arquivo = 'assets/uploads/demonstracao/demo-instituto-cidadania.png'
   );
 
 -- Segunda coleção de locais fictícios para ampliar a demonstração dos filtros.
@@ -182,7 +182,7 @@ UPDATE `locais` SET `status`='reprovado',`observacoes`='Solicitação recusada p
 UPDATE `locais` SET `status`='reprovado',`observacoes`='Solicitação recusada porque o evento já havia terminado e os recursos informados não puderam ser verificados pela moderação.' WHERE `nome`='Feira Comunidade Inclusiva (Demonstração)';
 
 INSERT INTO `local_fotos` (`local_id`,`arquivo`)
-SELECT l.id, CONCAT('assets/uploads/solicitacoes/', x.arquivo)
+SELECT l.id, CONCAT('assets/uploads/demonstracao/', x.arquivo)
 FROM `locais` l
 INNER JOIN (
   SELECT 'Mercado Bom Vizinho (Demonstração)' nome,'demo-mercado-bom-vizinho.png' arquivo UNION ALL
@@ -198,7 +198,7 @@ INNER JOIN (
 ) x ON x.nome=l.nome
 WHERE NOT EXISTS (
   SELECT 1 FROM `local_fotos` f
-  WHERE f.local_id=l.id AND f.arquivo=CONCAT('assets/uploads/solicitacoes/',x.arquivo)
+  WHERE f.local_id=l.id AND f.arquivo=CONCAT('assets/uploads/demonstracao/',x.arquivo)
 );
 
 -- Deficiências atendidas pelos locais demonstrativos, usadas diretamente pelos filtros do mapa.
