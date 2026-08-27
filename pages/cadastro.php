@@ -18,11 +18,11 @@
 <body onload="mudarposition()">
 
   <div class="container">
-    <img class="login-img" src="./assets/img/Imagem1.png" alt="logotipo do cadastro">
+    <img class="login-img" src="../assets/img/Imagem1.png" alt="logotipo do cadastro">
 
 
 
-    <form class="form" onsubmit="return validarFormulario()" action="salvar_usuario.php" method="POST">
+    <form class="form" onsubmit="return validarFormulario()" action="../actions/salvar_usuario.php" method="POST">
     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
     
     <div class="linha">
