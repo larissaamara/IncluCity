@@ -110,7 +110,6 @@ function configuracaoProvedor(string $provedor): array
  
     return $config;
 }
-
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
     header('Allow: GET');
     falharOAuth('Método não permitido.');
@@ -152,6 +151,9 @@ if (!$callback) {
         'prompt' => 'select_account',
     ];
  
+    // Garante que state, provedor e verificador PKCE estejam persistidos antes
+    // de o navegador sair do site e seguir para o Google.
+    session_write_close();
     header('Location: ' . $config['authorize'] . '?' . http_build_query($parametros));
     exit;
 }
