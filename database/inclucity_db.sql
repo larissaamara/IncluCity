@@ -8,7 +8,6 @@
 -- Versão do PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
 SET time_zone = "+00:00";
 
 
@@ -76,6 +75,14 @@ CREATE TABLE IF NOT EXISTS `locais` (
   `data_cadastro` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   KEY `idx_locais_usuario` (`usuario_id`),
+  KEY `idx_locais_status_data` (`status`, `data_cadastro`),
+  CONSTRAINT `chk_locais_estado` CHECK (`estado` REGEXP '^[A-Z]{2}$'),
+  CONSTRAINT `chk_locais_cep` CHECK (`cep` REGEXP '^[0-9]{8}$'),
+  CONSTRAINT `chk_locais_latitude` CHECK (`latitude` BETWEEN -90 AND 90),
+  CONSTRAINT `chk_locais_longitude` CHECK (`longitude` BETWEEN -180 AND 180),
+  CONSTRAINT `chk_locais_categorias` CHECK (JSON_VALID(`categorias`) AND JSON_TYPE(`categorias`) = 'ARRAY'),
+  CONSTRAINT `chk_locais_deficiencias` CHECK (JSON_VALID(`deficiencias`) AND JSON_TYPE(`deficiencias`) = 'ARRAY'),
+  CONSTRAINT `chk_locais_recursos` CHECK (JSON_VALID(`recursos`) AND JSON_TYPE(`recursos`) = 'ARRAY'),
   CONSTRAINT `fk_locais_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -88,8 +95,6 @@ CREATE TABLE IF NOT EXISTS `local_fotos` (
   KEY `idx_fotos_local` (`local_id`),
   CONSTRAINT `fk_fotos_local` FOREIGN KEY (`local_id`) REFERENCES `locais` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
