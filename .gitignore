@@ -10,6 +10,9 @@
 /config/local.php
 /config/*.local.php
 
+# Fotos enviadas por usuários (imagens demonstrativas ficam em outra pasta)
+/assets/uploads/solicitacoes/*
+
 # Logs, cache, sessoes e arquivos temporarios da aplicacao/PHP
 /logs/
 /log/
