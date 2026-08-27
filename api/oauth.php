@@ -97,7 +97,7 @@ function configuracaoProvedor(string $provedor): array
     return $config;
 }
  
-$provedor = strtolower((string) ($_GET['provider'] ?? $_SESSION['oauth_provider'] ?? ''));
+$provedor = strtolower((string) ($_GET['provider'] ?? $_SESSION['oauth_provider'] ?? 'google'));
 $config = configuracaoProvedor($provedor);
 $redirectUri = trim((string) ($_ENV['OAUTH_REDIRECT_URI'] ?? ''));
 if ($redirectUri === '') {
@@ -124,6 +124,9 @@ if (!isset($_GET['code'])) {
         'prompt' => 'select_account',
     ];
  
+    // Garante que state, provedor e verificador PKCE estejam persistidos antes
+    // de o navegador sair do site e seguir para o Google.
+    session_write_close();
     header('Location: ' . $config['authorize'] . '?' . http_build_query($parametros));
     exit;
 }
