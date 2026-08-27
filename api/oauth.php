@@ -118,8 +118,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
 $codigo = isset($_GET['code']) && is_string($_GET['code']) ? trim($_GET['code']) : '';
 $erroProvedor = isset($_GET['error']) && is_string($_GET['error']) ? $_GET['error'] : '';
 $callback = $codigo !== '' || $erroProvedor !== '';
-$provedorRecebido = $callback ? ($_SESSION['oauth_provider'] ?? '') : ($_GET['provider'] ?? '');
-$provedor = is_string($provedorRecebido) ? strtolower(trim($provedorRecebido)) : '';
+$provedorRecebido = $callback ? ($_SESSION['oauth_provider'] ?? 'google') : ($_GET['provider'] ?? 'google');
+$provedorNormalizado = is_string($provedorRecebido) ? strtolower(trim($provedorRecebido)) : '';
+$provedor = in_array($provedorNormalizado, ['google', 'microsoft'], true)
+    ? $provedorNormalizado
+    : 'google';
 $config = configuracaoProvedor($provedor);
 $redirectUri = trim((string) ($_ENV['OAUTH_REDIRECT_URI'] ?? ''));
 if ($redirectUri === '') {

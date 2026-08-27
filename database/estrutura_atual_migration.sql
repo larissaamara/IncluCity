@@ -29,21 +29,57 @@ ALTER TABLE `locais`
   ADD COLUMN IF NOT EXISTS `telefone` varchar(30) NULL AFTER `instagram`,
   ADD COLUMN IF NOT EXISTS `horario_funcionamento` varchar(255) NULL AFTER `telefone`;
 
-UPDATE `locais`
-SET `categorias` = JSON_ARRAY(`tipo`)
-WHERE (`categorias` IS NULL OR `categorias` = '') AND `tipo` IS NOT NULL AND `tipo` <> '';
+-- Migra colunas antigas somente quando elas realmente existirem.
+SET @possui_tipo_antigo = (
+  SELECT COUNT(*) FROM `information_schema`.`COLUMNS`
+  WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'locais' AND `COLUMN_NAME` = 'tipo'
+);
+SET @migrar_tipo_antigo = IF(
+  @possui_tipo_antigo > 0,
+  'UPDATE `locais` SET `categorias` = JSON_ARRAY(`tipo`) WHERE (`categorias` IS NULL OR `categorias` = '''') AND `tipo` IS NOT NULL AND `tipo` <> ''''',
+  'SELECT 1'
+);
+PREPARE `migracao_tipo` FROM @migrar_tipo_antigo;
+EXECUTE `migracao_tipo`;
+DEALLOCATE PREPARE `migracao_tipo`;
 
-UPDATE `locais`
-SET `deficiencias` = JSON_ARRAY(`deficiencia`)
-WHERE (`deficiencias` IS NULL OR `deficiencias` = '') AND `deficiencia` IS NOT NULL AND `deficiencia` <> '';
+SET @possui_deficiencia_antiga = (
+  SELECT COUNT(*) FROM `information_schema`.`COLUMNS`
+  WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'locais' AND `COLUMN_NAME` = 'deficiencia'
+);
+SET @migrar_deficiencia_antiga = IF(
+  @possui_deficiencia_antiga > 0,
+  'UPDATE `locais` SET `deficiencias` = JSON_ARRAY(`deficiencia`) WHERE (`deficiencias` IS NULL OR `deficiencias` = '''') AND `deficiencia` IS NOT NULL AND `deficiencia` <> ''''',
+  'SELECT 1'
+);
+PREPARE `migracao_deficiencia` FROM @migrar_deficiencia_antiga;
+EXECUTE `migracao_deficiencia`;
+DEALLOCATE PREPARE `migracao_deficiencia`;
 
-UPDATE `locais`
-SET `recursos` = JSON_ARRAY(),
-    `observacoes` = COALESCE(NULLIF(`observacoes`, ''), `comentario`)
-WHERE `recursos` IS NULL OR `recursos` = '';
+SET @possui_comentario_antigo = (
+  SELECT COUNT(*) FROM `information_schema`.`COLUMNS`
+  WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'locais' AND `COLUMN_NAME` = 'comentario'
+);
+SET @migrar_comentario_antigo = IF(
+  @possui_comentario_antigo > 0,
+  'UPDATE `locais` SET `observacoes` = `comentario` WHERE (`observacoes` IS NULL OR `observacoes` = '''') AND `comentario` IS NOT NULL AND `comentario` <> ''''',
+  'SELECT 1'
+);
+PREPARE `migracao_comentario` FROM @migrar_comentario_antigo;
+EXECUTE `migracao_comentario`;
+DEALLOCATE PREPARE `migracao_comentario`;
 
-UPDATE `locais` SET `categorias` = JSON_ARRAY() WHERE `categorias` IS NULL OR `categorias` = '';
-UPDATE `locais` SET `deficiencias` = JSON_ARRAY() WHERE `deficiencias` IS NULL OR `deficiencias` = '';
+UPDATE `locais` SET `categorias` = '[]'
+WHERE `categorias` IS NULL OR `categorias` = '' OR JSON_VALID(`categorias`) = 0;
+UPDATE `locais` SET `categorias` = '[]' WHERE JSON_TYPE(`categorias`) <> 'ARRAY';
+
+UPDATE `locais` SET `deficiencias` = '[]'
+WHERE `deficiencias` IS NULL OR `deficiencias` = '' OR JSON_VALID(`deficiencias`) = 0;
+UPDATE `locais` SET `deficiencias` = '[]' WHERE JSON_TYPE(`deficiencias`) <> 'ARRAY';
+
+UPDATE `locais` SET `recursos` = '[]'
+WHERE `recursos` IS NULL OR `recursos` = '' OR JSON_VALID(`recursos`) = 0;
+UPDATE `locais` SET `recursos` = '[]' WHERE JSON_TYPE(`recursos`) <> 'ARRAY';
 
 ALTER TABLE `locais`
   MODIFY `categorias` longtext NOT NULL,
@@ -66,15 +102,49 @@ CREATE TABLE IF NOT EXISTS `local_fotos` (
   CONSTRAINT `fk_fotos_local` FOREIGN KEY (`local_id`) REFERENCES `locais` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Garante que exista um administrador local sem criar senhas padrao.
-UPDATE `usuarios`
-SET `tipo_usuario` = 'admin'
-WHERE `id` = (
-  SELECT `primeiro_id`
-  FROM (SELECT MIN(`id`) AS `primeiro_id` FROM `usuarios`) AS `primeira_conta`
-)
-AND NOT EXISTS (
-  SELECT 1
-  FROM (SELECT `tipo_usuario` FROM `usuarios`) AS `perfis`
-  WHERE `tipo_usuario` = 'admin'
+ALTER TABLE `local_fotos`
+  MODIFY `local_id` int(11) NOT NULL,
+  MODIFY `arquivo` varchar(255) NOT NULL,
+  ADD INDEX IF NOT EXISTS `idx_fotos_local` (`local_id`);
+
+DELETE `f`
+FROM `local_fotos` AS `f`
+LEFT JOIN `locais` AS `l` ON `l`.`id` = `f`.`local_id`
+WHERE `l`.`id` IS NULL;
+
+SET @possui_fk_fotos_local = (
+  SELECT COUNT(*) FROM `information_schema`.`REFERENTIAL_CONSTRAINTS`
+  WHERE `CONSTRAINT_SCHEMA` = DATABASE() AND `CONSTRAINT_NAME` = 'fk_fotos_local'
 );
+SET @criar_fk_fotos_local = IF(
+  @possui_fk_fotos_local = 0,
+  'ALTER TABLE `local_fotos` ADD CONSTRAINT `fk_fotos_local` FOREIGN KEY (`local_id`) REFERENCES `locais` (`id`) ON DELETE CASCADE',
+  'SELECT 1'
+);
+PREPARE `criacao_fk_fotos_local` FROM @criar_fk_fotos_local;
+EXECUTE `criacao_fk_fotos_local`;
+DEALLOCATE PREPARE `criacao_fk_fotos_local`;
+
+-- Garante os índices e relacionamentos esperados pelo esquema atual.
+ALTER TABLE `locais`
+  ADD INDEX IF NOT EXISTS `idx_locais_usuario` (`usuario_id`);
+
+UPDATE `locais` AS `l`
+LEFT JOIN `usuarios` AS `u` ON `u`.`id` = `l`.`usuario_id`
+SET `l`.`usuario_id` = NULL
+WHERE `l`.`usuario_id` IS NOT NULL AND `u`.`id` IS NULL;
+
+SET @possui_fk_locais_usuario = (
+  SELECT COUNT(*) FROM `information_schema`.`REFERENTIAL_CONSTRAINTS`
+  WHERE `CONSTRAINT_SCHEMA` = DATABASE() AND `CONSTRAINT_NAME` = 'fk_locais_usuario'
+);
+SET @criar_fk_locais_usuario = IF(
+  @possui_fk_locais_usuario = 0,
+  'ALTER TABLE `locais` ADD CONSTRAINT `fk_locais_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL',
+  'SELECT 1'
+);
+PREPARE `criacao_fk_locais_usuario` FROM @criar_fk_locais_usuario;
+EXECUTE `criacao_fk_locais_usuario`;
+DEALLOCATE PREPARE `criacao_fk_locais_usuario`;
+
+-- A criação do primeiro administrador fica na migração específica admin_migration.sql.
