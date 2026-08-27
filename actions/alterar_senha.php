@@ -3,7 +3,7 @@ require_once dirname(__DIR__) . '/config/session.php';
 require_once dirname(__DIR__) . '/config/conn.php';
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    header("Location: nova.senha.php");
+    header("Location: ../pages/nova.senha.php");
     exit;
 }
 
@@ -17,7 +17,7 @@ $recuperacaoAutorizada = !empty($_SESSION["recuperacao_verificada"])
 $usuarioAutenticado = isset($_SESSION["usuario_id"], $_SESSION["usuario_email"]);
 
 if (!$recuperacaoAutorizada && !$usuarioAutenticado) {
-    header("Location: esqueceu.senha.php");
+    header("Location: ../pages/esqueceu.senha.php");
     exit;
 }
 
@@ -63,6 +63,6 @@ unset(
     $_SESSION["tentativas_codigo"]
 );
 
-echo "<script>alert('Senha alterada com sucesso!'); window.location.href = 'login.php';</script>";
+echo "<script>alert('Senha alterada com sucesso!'); window.location.href = '../pages/login.php';</script>";
 exit;
 ?>
