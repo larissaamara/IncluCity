@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/config/session.php';
-require_once "conexao.php";
+require_once dirname(__DIR__) . '/config/session.php';
+require_once dirname(__DIR__) . '/config/conn.php';
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: nova.senha.php");
