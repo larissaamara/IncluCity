@@ -1,3 +1,6 @@
+<?php
+require_once dirname(__DIR__) . '/config/session.php';
+?>
 <!doctype html>
 <html lang="pt-br">
 
