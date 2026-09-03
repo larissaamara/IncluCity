@@ -1,21 +1,36 @@
 USE `inclucity_db`;
 
+START TRANSACTION;
+
 -- Locais fictícios para demonstrar o mapa e seus filtros.
 -- O WHERE NOT EXISTS permite executar este arquivo mais de uma vez sem duplicar registros.
 
 -- Usuários fictícios cadastrados para representar contribuições da comunidade.
--- A senha é um hash aleatório sem senha conhecida e não permite acesso às contas.
+-- Celular, CPF e senha ficam nulos para que essas contas não possam autenticar.
 INSERT INTO `usuarios` (`nome`, `email`, `celular`, `cpf`, `senha`, `tipo_usuario`)
-SELECT 'Mariana Costa', 'mariana.costa@example.com', '(12) 90000-1001', '900.000.001-00', '$2y$10$LAGeRO49Ofa16zB2tp607.rqHlFkiY80lWbtk.las9zBaDHiMRDz.', 'usuario'
+SELECT 'Mariana Costa', 'mariana.costa@example.com', NULL, NULL, NULL, 'usuario'
 WHERE NOT EXISTS (SELECT 1 FROM `usuarios` WHERE `email` = 'mariana.costa@example.com');
 
 INSERT INTO `usuarios` (`nome`, `email`, `celular`, `cpf`, `senha`, `tipo_usuario`)
-SELECT 'Rafael Mendes', 'rafael.mendes@example.com', '(12) 90000-1002', '900.000.002-00', '$2y$10$LAGeRO49Ofa16zB2tp607.rqHlFkiY80lWbtk.las9zBaDHiMRDz.', 'usuario'
+SELECT 'Rafael Mendes', 'rafael.mendes@example.com', NULL, NULL, NULL, 'usuario'
 WHERE NOT EXISTS (SELECT 1 FROM `usuarios` WHERE `email` = 'rafael.mendes@example.com');
 
 INSERT INTO `usuarios` (`nome`, `email`, `celular`, `cpf`, `senha`, `tipo_usuario`)
-SELECT 'Camila Nogueira', 'camila.nogueira@example.com', '(12) 90000-1003', '900.000.003-00', '$2y$10$LAGeRO49Ofa16zB2tp607.rqHlFkiY80lWbtk.las9zBaDHiMRDz.', 'usuario'
+SELECT 'Camila Nogueira', 'camila.nogueira@example.com', NULL, NULL, NULL, 'usuario'
 WHERE NOT EXISTS (SELECT 1 FROM `usuarios` WHERE `email` = 'camila.nogueira@example.com');
+
+UPDATE `usuarios`
+SET `celular` = NULL,
+    `cpf` = NULL,
+    `senha` = NULL,
+    `oauth_provider` = NULL,
+    `oauth_subject` = NULL,
+    `tipo_usuario` = 'usuario'
+WHERE `email` IN (
+  'mariana.costa@example.com',
+  'rafael.mendes@example.com',
+  'camila.nogueira@example.com'
+);
 
 SET @usuario_mariana = (SELECT `id` FROM `usuarios` WHERE `email` = 'mariana.costa@example.com' LIMIT 1);
 SET @usuario_rafael = (SELECT `id` FROM `usuarios` WHERE `email` = 'rafael.mendes@example.com' LIMIT 1);
@@ -68,6 +83,17 @@ SET `usuario_id` = CASE `nome`
   WHEN 'Centro Cultural para Todos (Demonstração)' THEN @usuario_camila
   WHEN 'Igreja Comunidade Aberta (Demonstração)' THEN @usuario_mariana
   WHEN 'Instituto Cidadania (Demonstração)' THEN @usuario_rafael
+  WHEN 'Mercado Bom Vizinho (Demonstração)' THEN @usuario_mariana
+  WHEN 'Clínica Vida Plena (Demonstração)' THEN @usuario_rafael
+  WHEN 'Escola Horizonte Inclusivo (Demonstração)' THEN @usuario_camila
+  WHEN 'Parque das Araucárias (Demonstração)' THEN @usuario_mariana
+  WHEN 'Hotel Acolher (Demonstração)' THEN @usuario_rafael
+  WHEN 'Terminal Conexão Sul (Demonstração)' THEN @usuario_camila
+  WHEN 'Farmácia Bem-Estar (Demonstração)' THEN @usuario_mariana
+  WHEN 'Faculdade Nova Era (Demonstração)' THEN @usuario_rafael
+  WHEN 'Praça das Flores (Demonstração)' THEN @usuario_camila
+  WHEN 'Feira Comunidade Inclusiva (Demonstração)' THEN @usuario_mariana
+  ELSE `usuario_id`
 END
 WHERE `nome` LIKE '%(Demonstração)';
 
@@ -222,3 +248,5 @@ SET `deficiencias` = CASE `nome`
   ELSE `deficiencias`
 END
 WHERE `nome` LIKE '%(Demonstração)';
+
+COMMIT;
