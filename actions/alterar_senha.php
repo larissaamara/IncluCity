@@ -1,7 +1,5 @@
 <?php
 
-// Teste de nova branch da database
-
 require_once dirname(__DIR__) . '/config/session.php';
 require_once dirname(__DIR__) . '/config/conn.php';
 
