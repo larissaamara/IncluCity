@@ -31,6 +31,11 @@ body {
   justify-items: center;
   align-items: center;
 }
+
+.mensagem { display: flex; align-items: flex-start; gap: 12px; margin: 12px 0 4px; padding: 14px 16px; border: 1px solid #f1aeb5; border-radius: 14px; background: #fff1f2; color: #842029; box-shadow: 0 8px 20px rgba(132, 32, 41, .1); }
+.mensagem__icone { display: grid; flex: 0 0 26px; width: 26px; height: 26px; place-items: center; border-radius: 50%; background: #842029; color: #fff; font-weight: 700; }
+.mensagem strong { display: block; margin-bottom: 3px; }
+.mensagem p { margin: 0; font-size: 14px; line-height: 1.4; }
 .form {
   margin: 0;
 }
