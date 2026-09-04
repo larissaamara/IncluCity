@@ -14,7 +14,7 @@ $usuarioAutenticado = isset($_SESSION['usuario_id']) && (int) $_SESSION['usuario
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="../assets/css/mapa.css?v=3">
+  <link rel="stylesheet" href="../assets/css/mapa.css?v=7">
 </head>
 
 <body onload="mudarposition()">
@@ -65,6 +65,12 @@ $usuarioAutenticado = isset($_SESSION['usuario_id']) && (int) $_SESSION['usuario
         <span>Contribuir</span>
       </button>
       <h3>Mapa Acessível</h3>
+
+      <label class="rotulo-busca" for="buscaLocal">Pesquisar local</label>
+      <div class="campo-busca">
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <input type="search" id="buscaLocal" class="form-control" placeholder="Digite o nome do local" autocomplete="off" aria-describedby="resumoLocais">
+      </div>
 
       <select id="filtroCategoria" class="form-select mb-2" onchange="filtrar()">
         <option value="todos">Todas as categorias</option>
@@ -119,6 +125,11 @@ $usuarioAutenticado = isset($_SESSION['usuario_id']) && (int) $_SESSION['usuario
         <option value="Outro">Outro recurso</option>
       </select>
 
+      <div class="rodape-filtros">
+        <p id="resumoLocais" class="resumo-locais" aria-live="polite">Carregando locais...</p>
+        <button type="button" id="btnLimparFiltros" class="btn-limpar-filtros" hidden>Limpar filtros</button>
+      </div>
+
       <div id="listaLocais"></div>
     </div>
 
@@ -148,22 +159,32 @@ $usuarioAutenticado = isset($_SESSION['usuario_id']) && (int) $_SESSION['usuario
   </aside>
 
   <div id="formAdicionarLocal" class="modal-form" role="dialog" aria-modal="true" aria-labelledby="tituloSolicitacao" <?= $usuarioAutenticado ? '' : 'hidden' ?>>
-    <form id="formLocal" class="form-accessible" enctype="multipart/form-data">
+    <form id="formLocal" class="form-accessible" enctype="multipart/form-data" novalidate>
       <button type="button" id="btnFechar" class="btn-fechar" aria-label="Fechar formulário">&times;</button>
       <h3 id="tituloSolicitacao">Sugerir um novo local</h3>
-      <p class="form-intro">Conhece um lugar que deveria estar no nosso mapa? Envie as informações e fotos do local. Nossa equipe irá analisar a solicitação antes de publicá-la.</p>
+      <p class="form-intro">Conte o que você sabe. São apenas três etapas, com orientações simples em cada uma.</p>
+      <p class="form-obrigatorios"><span aria-hidden="true">*</span> indica informação obrigatória.</p>
+
+      <ol class="progresso-formulario" aria-label="Progresso do cadastro">
+        <li class="ativo" aria-current="step"><span>1</span> Local</li>
+        <li><span>2</span> Acessibilidade</li>
+        <li><span>3</span> Finalizar</li>
+      </ol>
+      <div id="erroFormulario" class="erro-formulario" role="alert" tabindex="-1"></div>
+
+      <section class="form-etapa" data-etapa="0" aria-labelledby="etapaLocal">
 
       <fieldset>
-        <legend>Sobre o local</legend>
+        <legend id="etapaLocal">1. Qual é o local?</legend>
         <div class="form-grid">
-          <label class="campo campo-largo">Nome do estabelecimento/local<input name="nome" id="nome" required minlength="3" maxlength="150"></label>
-          <label class="campo campo-largo">Endereço completo<input name="endereco" id="endereco" required maxlength="255"></label>
-          <label class="campo">Número<input name="numero" id="numero" required maxlength="20"></label>
-          <label class="campo">Complemento<input name="complemento" id="complemento" maxlength="100"></label>
-          <label class="campo">Bairro<input name="bairro" id="bairro" required maxlength="100"></label>
-          <label class="campo">Cidade<input name="cidade" id="cidade" required maxlength="100"></label>
-          <label class="campo">Estado<input name="estado" id="estado" required maxlength="2" pattern="[A-Za-z]{2}" placeholder="SP"></label>
-          <label class="campo">CEP<input name="cep" id="cep" required inputmode="numeric" maxlength="9" placeholder="00000-000"></label>
+          <label class="campo campo-largo">Nome do estabelecimento ou local <span class="asterisco" aria-hidden="true">*</span><input name="nome" id="nome" required minlength="3" maxlength="150" autocomplete="organization"></label>
+          <label class="campo campo-largo">Rua ou endereço <span class="asterisco" aria-hidden="true">*</span><input name="endereco" id="endereco" required minlength="3" maxlength="255" autocomplete="street-address" placeholder="Ex.: Avenida Central"></label>
+          <label class="campo">Número <small>(opcional)</small><input name="numero" id="numero" maxlength="20" placeholder="Ex.: 120 ou S/N"></label>
+          <label class="campo">Complemento <small>(opcional)</small><input name="complemento" id="complemento" maxlength="100"></label>
+          <label class="campo">Bairro <small>(opcional)</small><input name="bairro" id="bairro" maxlength="100" autocomplete="address-level3"></label>
+          <label class="campo">Cidade <span class="asterisco" aria-hidden="true">*</span><input name="cidade" id="cidade" required maxlength="100" autocomplete="address-level2"></label>
+          <label class="campo">Estado <span class="asterisco" aria-hidden="true">*</span><input name="estado" id="estado" required maxlength="2" pattern="[A-Za-z]{2}" value="SP" autocomplete="address-level1" aria-describedby="ajudaEstado"><small id="ajudaEstado">Use duas letras, como SP.</small></label>
+          <label class="campo">CEP <small>(opcional)</small><input name="cep" id="cep" inputmode="numeric" maxlength="9" autocomplete="postal-code" placeholder="00000-000"></label>
         </div>
         <input type="hidden" name="latitude" id="latitude"><input type="hidden" name="longitude" id="longitude">
         <button type="button" id="btnSelecionarMapa" class="btn-selecionar-mapa"><i class="fa-solid fa-map-pin"></i> Selecionar endereço diretamente no mapa</button>
@@ -171,8 +192,8 @@ $usuarioAutenticado = isset($_SESSION['usuario_id']) && (int) $_SESSION['usuario
       </fieldset>
 
       <fieldset>
-        <legend>Tipo de local</legend>
-        <p>Selecione uma ou mais categorias.</p>
+        <legend>Tipo de local <span class="asterisco" aria-hidden="true">*</span><span class="visually-hidden"> (obrigatório)</span></legend>
+        <p>Escolha pelo menos uma opção.</p>
         <div class="chips" id="categorias">
           <?php foreach (['Restaurante', 'Shopping', 'Mercado', 'Hospital', 'Clínica', 'Farmácia', 'Escola', 'Faculdade', 'Instituição/serviço', 'Órgão público', 'Igreja', 'Parque', 'Praça', 'Hotel', 'Transporte público', 'Comércio', 'Espaço cultural', 'Evento', 'Outro'] as $i => $categoria): ?>
             <label class="chip"><input type="checkbox" name="categorias[]" value="<?= htmlspecialchars($categoria) ?>"><span><?= htmlspecialchars($categoria) ?></span></label>
@@ -181,9 +202,16 @@ $usuarioAutenticado = isset($_SESSION['usuario_id']) && (int) $_SESSION['usuario
         <label id="campoOutraCategoria" class="campo condicional">Especifique a categoria<input name="outra_categoria" id="outraCategoria" maxlength="100"></label>
       </fieldset>
 
+        <div class="navegacao-etapa navegacao-direita">
+          <button type="button" class="btn-proximo" data-proxima>Continuar para acessibilidade <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
+        </div>
+      </section>
+
+      <section class="form-etapa" data-etapa="1" aria-labelledby="etapaAcessibilidade" hidden>
+
       <fieldset>
-        <legend>Quais deficiências este local atende?</legend>
-        <p>Selecione todas as opções compatíveis com os recursos que você verificou no local.</p>
+        <legend id="etapaAcessibilidade">2. Acessibilidade</legend>
+        <p>Se souber, selecione quais pessoas podem ser atendidas. Esta parte é opcional.</p>
         <div class="chips" id="deficiencias">
           <?php foreach (['fisica' => 'Deficiência física ou mobilidade reduzida', 'visual' => 'Deficiência visual', 'auditiva' => 'Deficiência auditiva', 'cognitiva' => 'Deficiência intelectual, cognitiva ou psicossocial'] as $valor => $rotulo): ?>
             <label class="chip"><input type="checkbox" name="deficiencias[]" value="<?= htmlspecialchars($valor, ENT_QUOTES, 'UTF-8') ?>"><span><?= htmlspecialchars($rotulo, ENT_QUOTES, 'UTF-8') ?></span></label>
@@ -192,8 +220,8 @@ $usuarioAutenticado = isset($_SESSION['usuario_id']) && (int) $_SESSION['usuario
       </fieldset>
 
       <fieldset>
-        <legend>Quais recursos de acessibilidade esse local possui?</legend>
-        <p>Marque apenas os recursos que você conseguiu verificar presencialmente.</p>
+        <legend>Quais recursos o local possui? <span class="asterisco" aria-hidden="true">*</span><span class="visually-hidden"> (obrigatório)</span></legend>
+        <p>Escolha pelo menos um recurso que você observou. Não precisa conhecer todos.</p>
         <div class="chips" id="recursos">
           <?php foreach (['Banheiro acessível', 'Rampa de acesso', 'Elevador acessível', 'Piso tátil', 'Entrada acessível', 'Vaga acessível', 'Sala de conforto', 'Espaço para cadeira de rodas', 'Atendimento prioritário', 'Balcão acessível', 'Corrimão', 'Sinalização acessível', 'Braile', 'Libras', 'Audiodescrição', 'Comunicação acessível', 'Cão-guia permitido', 'Outro'] as $recurso): ?>
             <label class="chip"><input type="checkbox" name="recursos[]" value="<?= htmlspecialchars($recurso) ?>"><span><?= htmlspecialchars($recurso) ?></span></label>
@@ -202,16 +230,24 @@ $usuarioAutenticado = isset($_SESSION['usuario_id']) && (int) $_SESSION['usuario
         <label id="campoOutroRecurso" class="campo condicional">Especifique o recurso<input name="outro_recurso" id="outroRecurso" maxlength="150"></label>
       </fieldset>
 
+        <div class="navegacao-etapa">
+          <button type="button" class="btn-voltar" data-anterior><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Voltar</button>
+          <button type="button" class="btn-proximo" data-proxima>Continuar <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
+        </div>
+      </section>
+
+      <section class="form-etapa" data-etapa="2" aria-labelledby="etapaFinalizar" hidden>
+
       <fieldset>
-        <legend>Comprove a acessibilidade do local</legend>
-        <p>Adicione fotos da entrada, rampa, banheiro, piso tátil, vaga, elevador, sinalização ou outros recursos.</p>
-        <label class="botao-fotos"><i class="fa-solid fa-camera"></i> Adicionar fotos<input type="file" name="fotos[]" id="fotos" accept="image/jpeg,image/png,image/webp" multiple required></label>
+        <legend id="etapaFinalizar">3. Foto <span class="asterisco" aria-hidden="true">*</span><span class="visually-hidden"> (obrigatória)</span></legend>
+        <p>Envie pelo menos uma foto que ajude a confirmar a acessibilidade informada.</p>
+        <label class="botao-fotos"><i class="fa-solid fa-camera"></i> Escolher fotos<input type="file" name="fotos[]" id="fotos" accept="image/jpeg,image/png,image/webp" multiple required></label>
         <div id="previewFotos" class="preview-fotos" aria-live="polite"></div>
-        <small>Envie de 1 a 8 fotos, com até 5 MB cada. Evite fotos com dados pessoais de outras pessoas.</small>
+        <small>Envie de 1 a 8 fotos, com no máximo 5 MB cada. Evite imagens com dados pessoais de outras pessoas.</small>
       </fieldset>
 
       <fieldset>
-        <legend>Observações</legend>
+        <legend>Conte mais <small>(opcional)</small></legend>
         <label class="campo"><textarea name="observacoes" id="observacoes" maxlength="2000" placeholder="Conte algo importante sobre a acessibilidade desse local…"></textarea></label>
       </fieldset>
 
@@ -227,8 +263,11 @@ $usuarioAutenticado = isset($_SESSION['usuario_id']) && (int) $_SESSION['usuario
 
       <label class="declaracao"><input type="checkbox" name="declaracao" value="1" required> Declaro que as informações fornecidas foram verificadas por mim e correspondem ao que encontrei no local.</label>
       <p class="aviso-envio">O envio desta solicitação não garante a publicação do local. As informações serão avaliadas pela equipe responsável pelo mapa.</p>
-      <div id="erroFormulario" class="erro-formulario" role="alert"></div>
-      <div class="form-buttons"><button type="submit" class="btn-enviar">Enviar solicitação</button><button type="button" id="btnCancelar" class="btn-cancelar">Cancelar</button></div>
+      <div class="navegacao-etapa">
+        <button type="button" class="btn-voltar" data-anterior><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Voltar</button>
+        <div class="form-buttons"><button type="submit" class="btn-enviar">Enviar local para análise</button><button type="button" id="btnCancelar" class="btn-cancelar">Cancelar</button></div>
+      </div>
+      </section>
     </form>
   </div>
 
@@ -285,7 +324,7 @@ $usuarioAutenticado = isset($_SESSION['usuario_id']) && (int) $_SESSION['usuario
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script src="../assets/js/mapa.js?v=4"></script>
+  <script src="../assets/js/mapa.js?v=8"></script>
   <script src="../assets/js/telainicial.js"></script>
 
   <div vw class="enabled">

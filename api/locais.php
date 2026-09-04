@@ -24,7 +24,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     try {
         $resultado = $con->query(
             "SELECT id, nome, endereco, numero, bairro, cidade, estado, latitude, longitude,
-                    categorias, deficiencias, recursos, observacoes, site, instagram, telefone, horario_funcionamento
+                    categorias, deficiencias, recursos, observacoes, site, instagram, telefone, horario_funcionamento,
+                    (SELECT GROUP_CONCAT(lf.arquivo ORDER BY lf.id SEPARATOR '||')
+                     FROM local_fotos lf WHERE lf.local_id = locais.id) AS fotos
              FROM locais WHERE status = 'aprovado' ORDER BY data_cadastro DESC"
         );
         $locais = [];
@@ -35,6 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $linha['categorias'] = json_decode($linha['categorias'], true) ?: [];
             $linha['deficiencias'] = json_decode($linha['deficiencias'] ?? '[]', true) ?: [];
             $linha['recursos'] = json_decode($linha['recursos'], true) ?: [];
+            $linha['fotos'] = array_values(array_filter(explode('||', (string) ($linha['fotos'] ?? ''))));
             unset($linha['latitude'], $linha['longitude']);
             $locais[] = $linha;
         }
@@ -93,13 +96,18 @@ $instagram = campoTexto($_POST, 'instagram');
 $telefone = campoTexto($_POST, 'telefone');
 $horario = campoTexto($_POST, 'horario_funcionamento');
 
+// Campos de endereço que ajudam na moderação, mas não devem impedir a contribuição.
+$numero = $numero !== '' ? $numero : 'S/N';
+$bairro = $bairro !== '' ? $bairro : 'Não informado';
+$cep = $cep !== '' ? $cep : '00000000';
+
 if (mb_strlen($nome) < 3 || mb_strlen($nome) > 150 || mb_strlen($endereco) < 3 || mb_strlen($endereco) > 255
-    || $numero === '' || mb_strlen($numero) > 20 || $bairro === '' || mb_strlen($bairro) > 100
+    || mb_strlen($numero) > 20 || mb_strlen($bairro) > 100
     || $cidade === '' || mb_strlen($cidade) > 100 || mb_strlen($complemento) > 100
     || !preg_match('/^[A-Z]{2}$/', $estado)
     || strlen($cep) !== 8 || $latitude === false || $longitude === false
     || $latitude < -90 || $latitude > 90 || $longitude < -180 || $longitude > 180
-    || !$categorias || !$deficiencias || !$recursos || ($_POST['declaracao'] ?? null) !== '1') {
+    || !$categorias || !$recursos || ($_POST['declaracao'] ?? null) !== '1') {
     responder(['erro' => 'Preencha todos os campos obrigatórios e confirme a declaração.'], 422);
 }
 
@@ -118,7 +126,15 @@ if (mb_strlen($site) > 255 || mb_strlen($instagram) > 100 || mb_strlen($telefone
 }
 
 $fotos = $_FILES['fotos'] ?? null;
-$quantidadeFotos = is_array($fotos['name'] ?? null) ? count($fotos['name']) : 0;
+$indicesFotos = [];
+if (is_array($fotos['error'] ?? null)) {
+    foreach ($fotos['error'] as $indice => $erroFoto) {
+        if ($erroFoto !== UPLOAD_ERR_NO_FILE) {
+            $indicesFotos[] = $indice;
+        }
+    }
+}
+$quantidadeFotos = count($indicesFotos);
 if ($quantidadeFotos < 1 || $quantidadeFotos > 8) {
     responder(['erro' => 'Envie entre 1 e 8 fotos.'], 422);
 }
@@ -131,7 +147,7 @@ if (!is_dir($diretorio) && !mkdir($diretorio, 0750, true) && !is_dir($diretorio)
 $finfo = new finfo(FILEINFO_MIME_TYPE);
 $extensoes = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
 $arquivos = [];
-for ($i = 0; $i < $quantidadeFotos; $i++) {
+foreach ($indicesFotos as $i) {
     $erroUpload = $fotos['error'][$i] ?? UPLOAD_ERR_NO_FILE;
     $temporario = $fotos['tmp_name'][$i] ?? '';
     $tamanho = (int) ($fotos['size'][$i] ?? 0);
