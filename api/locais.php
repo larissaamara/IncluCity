@@ -26,7 +26,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             "SELECT id, nome, endereco, numero, bairro, cidade, estado, latitude, longitude,
                     categorias, deficiencias, recursos, observacoes, site, instagram, telefone, horario_funcionamento,
                     (SELECT GROUP_CONCAT(lf.arquivo ORDER BY lf.id SEPARATOR '||')
-                     FROM local_fotos lf WHERE lf.local_id = locais.id) AS fotos
+                     FROM local_fotos lf WHERE lf.local_id = locais.id) AS fotos,
+                    (SELECT ROUND(AVG(a.nota), 1) FROM avaliacoes a WHERE a.local_id = locais.id) AS media_avaliacoes,
+                    (SELECT COUNT(*) FROM avaliacoes a WHERE a.local_id = locais.id) AS total_avaliacoes
              FROM locais WHERE status = 'aprovado' ORDER BY data_cadastro DESC"
         );
         $locais = [];
@@ -38,6 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $linha['deficiencias'] = json_decode($linha['deficiencias'] ?? '[]', true) ?: [];
             $linha['recursos'] = json_decode($linha['recursos'], true) ?: [];
             $linha['fotos'] = array_values(array_filter(explode('||', (string) ($linha['fotos'] ?? ''))));
+            $linha['media_avaliacoes'] = $linha['media_avaliacoes'] !== null ? (float) $linha['media_avaliacoes'] : 0.0;
+            $linha['total_avaliacoes'] = (int) $linha['total_avaliacoes'];
             unset($linha['latitude'], $linha['longitude']);
             $locais[] = $linha;
         }

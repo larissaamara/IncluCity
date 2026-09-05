@@ -17,7 +17,12 @@ const resumoLocais = document.getElementById('resumoLocais');
 const btnLimparFiltros = document.getElementById('btnLimparFiltros');
 const etapasFormulario = [...document.querySelectorAll('.form-etapa')];
 const indicadoresFormulario = [...document.querySelectorAll('.progresso-formulario li')];
+const modalAvaliacoes = document.getElementById('modalAvaliacoes');
+const listaAvaliacoes = document.getElementById('listaAvaliacoes');
+const formAvaliacao = document.getElementById('formAvaliacao');
 let etapaFormularioAtual = 0;
+let localAvaliadoAtual = null;
+let gatilhoAvaliacoes = null;
 
 function escaparHtml(valor) {
   const elemento = document.createElement('div');
@@ -42,11 +47,19 @@ function urlFoto(caminho) {
   return `../${escaparHtml(caminhoSeguro)}`;
 }
 
+function resumoAvaliacao(local) {
+  const total = Number(local.total_avaliacoes) || 0;
+  if (!total) return '<span class="resumo-avaliacao sem-avaliacoes">Ainda sem avaliações</span>';
+  const media = Number(local.media_avaliacoes) || 0;
+  const textoMedia = media.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  return `<span class="resumo-avaliacao" aria-label="Nota média ${textoMedia} de 5, em ${total} avaliações"><span aria-hidden="true">★</span> ${textoMedia} (${total})</span>`;
+}
+
 function conteudoLocal(local) {
   const categorias = (local.categorias || []).map(escaparHtml).join(' • ');
   const recursos = (local.recursos || []).map(escaparHtml).join(', ');
   const foto = urlFoto((local.fotos || [])[0]);
-  return `<div class="popup-local">${foto ? `<img class="popup-local-foto" src="${foto}" alt="Foto de ${escaparHtml(local.nome)}">` : ''}<strong>${escaparHtml(local.nome)}</strong><span>${categorias}</span><p>${escaparHtml(local.endereco)}, ${escaparHtml(local.numero)} — ${escaparHtml(local.bairro)}</p><small><b>Recursos:</b> ${recursos}</small></div>`;
+  return `<div class="popup-local">${foto ? `<img class="popup-local-foto" src="${foto}" alt="Foto de ${escaparHtml(local.nome)}">` : ''}<strong>${escaparHtml(local.nome)}</strong><span>${categorias}</span>${resumoAvaliacao(local)}<p>${escaparHtml(local.endereco)}, ${escaparHtml(local.numero)} — ${escaparHtml(local.bairro)}</p><small><b>Recursos:</b> ${recursos}</small><button type="button" class="btn-popup-avaliacoes" data-abrir-avaliacoes="${Number(local.id)}">Ver avaliações e comentários</button></div>`;
 }
 
 function renderizar(lista = locais, filtrosAtivos = false, termoBusca = '') {
@@ -61,8 +74,8 @@ function renderizar(lista = locais, filtrosAtivos = false, termoBusca = '') {
       marcador.getElement()?.classList.add('marcador-destaque');
     }
     marcadores.push(marcador);
-    const item = document.createElement('button');
-    item.type = 'button'; item.className = termoBusca ? 'local local-destaque' : 'local';
+    const item = document.createElement('article');
+    item.className = termoBusca ? 'local local-destaque' : 'local';
     const categorias = local.categorias || [];
     const recursos = local.recursos || [];
     const foto = urlFoto((local.fotos || [])[0]);
@@ -73,10 +86,13 @@ function renderizar(lista = locais, filtrosAtivos = false, termoBusca = '') {
       <span class="local-categoria">${categorias.map(escaparHtml).join(' • ') || 'Local'}</span>
       <strong class="local-nome">${destacarNome(local.nome, termoBusca)}</strong>
       <span class="local-endereco"><i class="fa-solid fa-location-dot" aria-hidden="true"></i>${escaparHtml(local.bairro)} — ${escaparHtml(local.cidade)}</span>
+      ${resumoAvaliacao(local)}
       <span class="local-recursos">${recursosVisiveis.map(recurso => `<span>${escaparHtml(recurso)}</span>`).join('')}${quantidadeRestante > 0 ? `<span>+${quantidadeRestante}</span>` : ''}</span>
-      <span class="local-acao">Ver no mapa <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>`;
-    item.setAttribute('aria-label', `Ver ${local.nome} no mapa`);
-    item.addEventListener('click', () => { map.setView([local.lat, local.lng], 16); marcador.openPopup(); });
+      <div class="local-acoes">
+        <button type="button" class="local-acao btn-ver-mapa">Ver no mapa <i class="fa-solid fa-location-arrow" aria-hidden="true"></i></button>
+        <button type="button" class="local-acao btn-ver-avaliacoes" data-abrir-avaliacoes="${Number(local.id)}">Avaliações <i class="fa-solid fa-star" aria-hidden="true"></i></button>
+      </div>`;
+    item.querySelector('.btn-ver-mapa').addEventListener('click', () => { map.setView([local.lat, local.lng], 16); marcador.openPopup(); });
     container.appendChild(item);
   });
   if (!lista.length) {
@@ -158,6 +174,184 @@ btnLimparFiltros.addEventListener('click', () => {
   filtrar();
   buscaLocal.focus();
 });
+
+function textoDataAvaliacao(valor) {
+  const data = new Date(String(valor ?? '').replace(' ', 'T'));
+  return Number.isNaN(data.getTime())
+    ? ''
+    : data.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+}
+
+function atualizarEstrelasSelecionadas() {
+  if (!formAvaliacao) return;
+  const nota = Number(formAvaliacao.querySelector('input[name="nota"]:checked')?.value) || 0;
+  formAvaliacao.querySelectorAll('.selecao-estrelas label').forEach((label, indice) => {
+    label.classList.toggle('selecionada', indice < nota);
+  });
+}
+
+function renderizarAvaliacoes(dados) {
+  const media = Number(dados.resumo?.media) || 0;
+  const total = Number(dados.resumo?.total) || 0;
+  const mediaTexto = media.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  document.getElementById('mediaAvaliacoes').innerHTML = total
+    ? `<strong>${mediaTexto}</strong><span class="estrelas-media" aria-hidden="true">★</span><span>${total} ${total === 1 ? 'avaliação' : 'avaliações'}</span>`
+    : '<span>Este local ainda não recebeu avaliações.</span>';
+
+  listaAvaliacoes.replaceChildren();
+  if (!dados.avaliacoes?.length) {
+    const vazio = document.createElement('p');
+    vazio.className = 'avaliacoes-vazias';
+    vazio.textContent = 'Seja a primeira pessoa a avaliar este local.';
+    listaAvaliacoes.appendChild(vazio);
+  } else {
+    dados.avaliacoes.forEach(avaliacao => {
+      const item = document.createElement('article');
+      item.className = `avaliacao-item${avaliacao.minha ? ' minha-avaliacao' : ''}`;
+      const topo = document.createElement('div');
+      topo.className = 'avaliacao-topo';
+      const autor = document.createElement('strong');
+      autor.textContent = avaliacao.minha ? `${avaliacao.usuario} (você)` : avaliacao.usuario;
+      const data = document.createElement('time');
+      data.dateTime = avaliacao.data_atualizacao;
+      data.textContent = textoDataAvaliacao(avaliacao.data_atualizacao);
+      topo.append(autor, data);
+
+      const estrelas = document.createElement('div');
+      estrelas.className = 'estrelas-avaliacao';
+      estrelas.setAttribute('aria-label', `${avaliacao.nota} de 5 estrelas`);
+      estrelas.innerHTML = `<span aria-hidden="true">${'★'.repeat(avaliacao.nota)}${'☆'.repeat(5 - avaliacao.nota)}</span>`;
+      item.append(topo, estrelas);
+      if (avaliacao.comentario) {
+        const comentario = document.createElement('p');
+        comentario.textContent = avaliacao.comentario;
+        item.appendChild(comentario);
+      }
+      listaAvaliacoes.appendChild(item);
+    });
+  }
+
+  if (formAvaliacao) {
+    formAvaliacao.reset();
+    document.getElementById('avaliacaoLocalId').value = localAvaliadoAtual;
+    document.getElementById('comentarioAvaliacao').value = dados.minha_avaliacao?.comentario || '';
+    if (dados.minha_avaliacao?.nota) {
+      document.getElementById(`nota${dados.minha_avaliacao.nota}`).checked = true;
+    }
+    formAvaliacao.querySelector('.btn-publicar-avaliacao').textContent = dados.minha_avaliacao
+      ? 'Atualizar minha avaliação'
+      : 'Publicar avaliação';
+    document.getElementById('contadorComentario').textContent = `${document.getElementById('comentarioAvaliacao').value.length.toLocaleString('pt-BR')} de 1.500 caracteres`;
+    atualizarEstrelasSelecionadas();
+  }
+}
+
+async function carregarAvaliacoes(localId, atualizarMapa = false) {
+  listaAvaliacoes.textContent = 'Carregando avaliações...';
+  const resposta = await fetch(`../api/interacoes.php?local_id=${encodeURIComponent(localId)}`, { headers: { Accept: 'application/json' } });
+  const dados = await resposta.json();
+  if (!resposta.ok) throw new Error(dados.erro || 'Não foi possível carregar as avaliações.');
+  renderizarAvaliacoes(dados);
+  if (atualizarMapa) {
+    const local = locais.find(item => Number(item.id) === Number(localId));
+    if (local) {
+      local.media_avaliacoes = Number(dados.resumo.media) || 0;
+      local.total_avaliacoes = Number(dados.resumo.total) || 0;
+      filtrar();
+    }
+  }
+  return dados;
+}
+
+async function abrirAvaliacoes(localId, gatilho) {
+  const local = locais.find(item => Number(item.id) === Number(localId));
+  if (!local) return;
+  localAvaliadoAtual = Number(localId);
+  gatilhoAvaliacoes = gatilho;
+  document.getElementById('tituloAvaliacoes').textContent = local.nome;
+  document.getElementById('mediaAvaliacoes').textContent = '';
+  if (formAvaliacao) document.getElementById('statusAvaliacao').textContent = '';
+  modalAvaliacoes.classList.add('ativa');
+  modalAvaliacoes.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-aberto');
+  document.getElementById('btnFecharAvaliacoes').focus();
+  try {
+    await carregarAvaliacoes(localAvaliadoAtual);
+  } catch (erro) {
+    listaAvaliacoes.textContent = erro.message;
+  }
+}
+
+function fecharAvaliacoes() {
+  modalAvaliacoes.classList.remove('ativa');
+  modalAvaliacoes.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('modal-aberto');
+  if (gatilhoAvaliacoes?.isConnected) gatilhoAvaliacoes.focus();
+  else buscaLocal.focus();
+}
+
+document.addEventListener('click', evento => {
+  const botao = evento.target.closest('[data-abrir-avaliacoes]');
+  if (botao) abrirAvaliacoes(botao.dataset.abrirAvaliacoes, botao);
+});
+document.getElementById('btnFecharAvaliacoes').addEventListener('click', fecharAvaliacoes);
+modalAvaliacoes.addEventListener('click', evento => { if (evento.target === modalAvaliacoes) fecharAvaliacoes(); });
+modalAvaliacoes.addEventListener('keydown', evento => {
+  if (evento.key === 'Escape') {
+    fecharAvaliacoes();
+    return;
+  }
+  if (evento.key !== 'Tab') return;
+  const focaveis = [...modalAvaliacoes.querySelectorAll('button, a, input, textarea, [tabindex]:not([tabindex="-1"])')]
+    .filter(elemento => !elemento.disabled && elemento.offsetParent !== null);
+  if (!focaveis.length) return;
+  const primeiro = focaveis[0];
+  const ultimo = focaveis[focaveis.length - 1];
+  if (evento.shiftKey && document.activeElement === primeiro) { evento.preventDefault(); ultimo.focus(); }
+  else if (!evento.shiftKey && document.activeElement === ultimo) { evento.preventDefault(); primeiro.focus(); }
+});
+
+if (formAvaliacao) {
+  formAvaliacao.querySelectorAll('input[name="nota"]').forEach(input => input.addEventListener('change', atualizarEstrelasSelecionadas));
+  document.getElementById('comentarioAvaliacao').addEventListener('input', evento => {
+    document.getElementById('contadorComentario').textContent = `${evento.target.value.length.toLocaleString('pt-BR')} de 1.500 caracteres`;
+  });
+  formAvaliacao.addEventListener('submit', async evento => {
+    evento.preventDefault();
+    const status = document.getElementById('statusAvaliacao');
+    const nota = formAvaliacao.querySelector('input[name="nota"]:checked');
+    if (!nota) {
+      status.textContent = 'Escolha uma nota de 1 a 5 estrelas.';
+      status.focus();
+      return;
+    }
+    const botao = formAvaliacao.querySelector('.btn-publicar-avaliacao');
+    const textoOriginalBotao = botao.textContent;
+    botao.disabled = true;
+    botao.textContent = 'Publicando...';
+    status.textContent = '';
+    try {
+      const resposta = await fetch('../api/interacoes.php', {
+        method: 'POST',
+        headers: { 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content },
+        body: new FormData(formAvaliacao),
+      });
+      const resultado = await resposta.json();
+      if (!resposta.ok) throw new Error(resultado.erro || 'Não foi possível publicar sua avaliação.');
+      await carregarAvaliacoes(localAvaliadoAtual, true);
+      status.textContent = resultado.mensagem;
+      status.classList.add('sucesso');
+      status.focus();
+    } catch (erro) {
+      status.textContent = erro.message;
+      status.classList.remove('sucesso');
+      status.focus();
+    } finally {
+      botao.disabled = false;
+      if (botao.textContent === 'Publicando...') botao.textContent = textoOriginalBotao;
+    }
+  });
+}
 
 function alternarMenu(aberto) {
   menu.classList.toggle('aberto', aberto); menu.setAttribute('aria-hidden', String(!aberto));

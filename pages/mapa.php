@@ -14,7 +14,7 @@ $usuarioAutenticado = isset($_SESSION['usuario_id']) && (int) $_SESSION['usuario
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="../assets/css/mapa.css?v=7">
+  <link rel="stylesheet" href="../assets/css/mapa.css?v=8">
 </head>
 
 <body onload="mudarposition()">
@@ -278,6 +278,47 @@ $usuarioAutenticado = isset($_SESSION['usuario_id']) && (int) $_SESSION['usuario
     </div>
   </div>
 
+  <div id="modalAvaliacoes" class="modal-avaliacoes" role="dialog" aria-modal="true" aria-labelledby="tituloAvaliacoes" aria-hidden="true">
+    <div class="painel-avaliacoes">
+      <button type="button" id="btnFecharAvaliacoes" class="btn-fechar-avaliacoes" aria-label="Fechar avaliações">&times;</button>
+      <header class="cabecalho-avaliacoes">
+        <span class="rotulo-avaliacoes">Avaliações da comunidade</span>
+        <h2 id="tituloAvaliacoes">Local</h2>
+        <div id="mediaAvaliacoes" class="media-avaliacoes" aria-live="polite"></div>
+      </header>
+
+      <?php if ($usuarioAutenticado): ?>
+        <form id="formAvaliacao" class="form-avaliacao" novalidate>
+          <input type="hidden" name="local_id" id="avaliacaoLocalId">
+          <fieldset>
+            <legend>Qual é a sua avaliação?</legend>
+            <div class="selecao-estrelas" role="radiogroup" aria-label="Nota de uma a cinco estrelas">
+              <?php for ($nota = 1; $nota <= 5; $nota++): ?>
+                <input type="radio" name="nota" id="nota<?= $nota ?>" value="<?= $nota ?>" required>
+                <label for="nota<?= $nota ?>" aria-label="<?= $nota ?> <?= $nota === 1 ? 'estrela' : 'estrelas' ?>"><span aria-hidden="true">★</span></label>
+              <?php endfor; ?>
+            </div>
+          </fieldset>
+          <label for="comentarioAvaliacao">Conte como foi sua experiência <small>(opcional)</small></label>
+          <textarea name="comentario" id="comentarioAvaliacao" maxlength="1500" rows="4" placeholder="Comente sobre entrada, atendimento, circulação e recursos de acessibilidade." aria-describedby="contadorComentario"></textarea>
+          <span id="contadorComentario" class="contador-comentario">0 de 1.500 caracteres</span>
+          <button type="submit" class="btn-publicar-avaliacao">Publicar avaliação</button>
+          <p id="statusAvaliacao" class="status-avaliacao" role="status" tabindex="-1"></p>
+        </form>
+      <?php else: ?>
+        <div class="convite-avaliacao">
+          <p>Entre na sua conta para publicar uma nota e contar sua experiência.</p>
+          <a href="login.php">Entrar para avaliar</a>
+        </div>
+      <?php endif; ?>
+
+      <section class="lista-avaliacoes-secao" aria-labelledby="tituloListaAvaliacoes">
+        <h3 id="tituloListaAvaliacoes">Comentários</h3>
+        <div id="listaAvaliacoes" class="lista-avaliacoes" aria-live="polite"></div>
+      </section>
+    </div>
+  </div>
+
   <!-- FOOTER -->
   <footer class="footer">
     <div class="footer-container">
@@ -324,7 +365,7 @@ $usuarioAutenticado = isset($_SESSION['usuario_id']) && (int) $_SESSION['usuario
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script src="../assets/js/mapa.js?v=8"></script>
+  <script src="../assets/js/mapa.js?v=9"></script>
   <script src="../assets/js/telainicial.js"></script>
 
   <div vw class="enabled">
