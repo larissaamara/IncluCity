@@ -15,6 +15,11 @@ body{
   align-items: center;
 }
 
+.mensagem { display: flex; align-items: flex-start; gap: 12px; margin: 12px 0 4px; padding: 14px 16px; border: 1px solid #a3cfbb; border-radius: 14px; background: #eaf7ef; color: #0f5132; box-shadow: 0 8px 20px rgba(15, 81, 50, .12); }
+.mensagem__icone { display: grid; flex: 0 0 28px; width: 28px; height: 28px; place-items: center; border-radius: 50%; background: #198754; color: #fff; font-weight: 700; }
+.mensagem strong { display: block; margin-bottom: 3px; }
+.mensagem p { margin: 0; font-size: 14px; line-height: 1.4; }
+
 .container {
   max-width: 430px;
   background: #0f517c;

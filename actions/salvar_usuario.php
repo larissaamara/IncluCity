@@ -10,20 +10,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 if (!csrfValido($_POST['csrf_token'] ?? null)) {
-    http_response_code(403);
-    exit('Solicitação inválida. Atualize a página e tente novamente.');
+    definirMensagemFlash('erro', 'Não foi possível continuar', 'Sua sessão expirou. Atualize a página e tente novamente.');
+    header('Location: ../pages/cadastro.php');
+    exit;
 }
 
 require_once dirname(__DIR__) . '/config/conn.php';
 
 function voltarComErro(string $mensagem): never
 {
-    $mensagemJs = json_encode(
-        $mensagem,
-        JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
-    );
-
-    echo "<script>alert({$mensagemJs}); window.location.href = '../pages/cadastro.php';</script>";
+    definirMensagemFlash('erro', 'Revise os dados', $mensagem);
+    header('Location: ../pages/cadastro.php');
     exit;
 }
 
@@ -131,4 +128,10 @@ try {
 $stmt->close();
 $con->close();
 
-echo "<script>alert('Cadastro realizado com sucesso!'); window.location.href = '../pages/login.php';</script>";
+definirMensagemFlash(
+    'sucesso',
+    'Cadastro concluído!',
+    'Seu e-mail foi cadastrado com sucesso. Agora você já pode entrar na sua conta.'
+);
+header('Location: ../pages/login.php');
+exit;
