@@ -1,6 +1,12 @@
 <?php
 require_once dirname(__DIR__) . '/config/session.php';
 $mensagemFlash = obterMensagemFlash();
+$cadastroConcluido = ($mensagemFlash['tipo'] ?? '') === 'sucesso';
+
+if (usuarioAutenticado() && !$cadastroConcluido) {
+  header('Location: ' . paginaDaConta());
+  exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -23,7 +29,7 @@ $mensagemFlash = obterMensagemFlash();
   <div class="container">
     <img class="login-img" src="../assets/img/Imagem1.png" alt="logotipo do cadastro">
 
-    <?php if ($mensagemFlash): ?>
+    <?php if ($mensagemFlash && !$cadastroConcluido): ?>
       <div class="mensagem mensagem--<?= htmlspecialchars($mensagemFlash['tipo'], ENT_QUOTES, 'UTF-8') ?>" role="alert" aria-live="assertive">
         <span class="mensagem__icone" aria-hidden="true">!</span>
         <div>
@@ -115,7 +121,29 @@ $mensagemFlash = obterMensagemFlash();
     </span>
   </div>
 
-  <script src="../assets/js/cadastro.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <?php if ($cadastroConcluido): ?>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const destino = 'TelaUsuario.php';
+      if (typeof Swal === 'undefined') {
+        window.location.replace(destino);
+        return;
+      }
+
+      Swal.fire({
+        icon: 'success',
+        title: <?= json_encode($mensagemFlash['titulo'], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
+        text: <?= json_encode($mensagemFlash['mensagem'], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
+        confirmButtonText: 'Ir para minha conta',
+        confirmButtonColor: '#0f517c',
+        allowOutsideClick: false,
+        allowEscapeKey: false
+      }).then(() => window.location.replace(destino));
+    });
+  </script>
+  <?php endif; ?>
+  <script src="../assets/js/cadastro.js?v=2"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
     crossorigin="anonymous"></script>

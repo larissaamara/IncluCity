@@ -32,10 +32,16 @@ Em produção, use no `.env`:
 ```dotenv
 APP_ENV=production
 RECOVERY_DELIVERY=mail
-MAIL_FROM=no-reply@seudominio.com
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_ENCRYPTION=tls
+MAIL_USERNAME=cabrabom.leandro@gmail.com
+MAIL_PASSWORD=sua_senha_de_app
+MAIL_FROM=cabrabom.leandro@gmail.com
+MAIL_FROM_NAME=IncluCity
 ```
 
-O servidor PHP precisa estar configurado para enviar e-mail. Para desenvolvimento local sem SMTP, use `APP_ENV=development` e `RECOVERY_DELIVERY=screen`; nessa combinação o código aparece apenas na página local de recuperação.
+O envio usa PHPMailer com SMTP autenticado. Para uma conta Gmail, ative a verificação em duas etapas e use uma senha de app em `MAIL_PASSWORD`; não use a senha normal da conta. Para desenvolvimento local sem SMTP, use `APP_ENV=development` e `RECOVERY_DELIVERY=screen`; nessa combinação o código aparece apenas na página local de recuperação. O e-mail de boas-vindas continua dependendo do SMTP configurado.
 
 ### Abrir pelo VS Code
 

@@ -125,13 +125,35 @@ try {
     voltarComErro('Não foi possível realizar o cadastro. Tente novamente.');
 }
 
+$usuarioId = (int) $stmt->insert_id;
 $stmt->close();
 $con->close();
 
+// O cadastro também inicia a sessão para que o usuário siga diretamente
+// para a própria área depois de confirmar o alerta de sucesso.
+session_regenerate_id(true);
+$_SESSION['usuario_id'] = $usuarioId;
+$_SESSION['usuario_nome'] = $nome;
+$_SESSION['usuario_email'] = $email;
+$_SESSION['usuario_celular'] = $celular;
+$_SESSION['usuario_cpf'] = $cpf;
+$_SESSION['tipo_usuario'] = 'usuario';
+
+$emailBoasVindasEnviado = false;
+try {
+    require_once dirname(__DIR__) . '/config/mailer.php';
+    enviarEmailBoasVindas($email, $nome);
+    $emailBoasVindasEnviado = true;
+} catch (Throwable $erro) {
+    error_log('Não foi possível enviar o e-mail de boas-vindas: ' . $erro->getMessage());
+}
+
 definirMensagemFlash(
     'sucesso',
-    'Cadastro concluído!',
-    'Seu e-mail foi cadastrado com sucesso. Agora você já pode entrar na sua conta.'
+    'E-mail cadastrado com sucesso!',
+    $emailBoasVindasEnviado
+        ? "A conta de {$email} foi criada e enviamos uma mensagem de boas-vindas."
+        : "A conta de {$email} foi criada. Você já pode acessar sua área no IncluCity."
 );
-header('Location: ../pages/login.php');
+header('Location: ../pages/cadastro.php');
 exit;
