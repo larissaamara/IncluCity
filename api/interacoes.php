@@ -21,11 +21,30 @@ if (!$verificar->get_result()->fetch_assoc()) jsonResposta(['erro' => 'Local nã
 $verificar->close();
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $stmt = $con->prepare('SELECT a.nota, a.comentario, a.data_atualizacao, u.nome AS usuario FROM avaliacoes a JOIN usuarios u ON u.id = a.usuario_id WHERE a.local_id = ? ORDER BY a.data_atualizacao DESC');
+    $stmt = $con->prepare('SELECT a.usuario_id, a.nota, a.comentario, a.data_atualizacao, u.nome AS usuario FROM avaliacoes a JOIN usuarios u ON u.id = a.usuario_id WHERE a.local_id = ? ORDER BY a.data_atualizacao DESC');
     $stmt->bind_param('i', $localId); $stmt->execute();
     $avaliacoes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC); $stmt->close();
-    foreach ($avaliacoes as &$item) $item['nota'] = (int) $item['nota'];
-    jsonResposta(['avaliacoes' => $avaliacoes]);
+    $usuarioId = usuarioAutenticado() ? (int) $_SESSION['usuario_id'] : 0;
+    $minhaAvaliacao = null;
+    $soma = 0;
+    foreach ($avaliacoes as &$item) {
+        $item['nota'] = (int) $item['nota'];
+        $soma += $item['nota'];
+        if ((int) $item['usuario_id'] === $usuarioId) {
+            $minhaAvaliacao = ['nota' => $item['nota'], 'comentario' => (string) $item['comentario']];
+            $item['minha'] = true;
+        } else {
+            $item['minha'] = false;
+        }
+        unset($item['usuario_id']);
+    }
+    unset($item);
+    $total = count($avaliacoes);
+    jsonResposta([
+        'resumo' => ['media' => $total ? round($soma / $total, 1) : 0, 'total' => $total],
+        'minha_avaliacao' => $minhaAvaliacao,
+        'avaliacoes' => $avaliacoes,
+    ]);
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') jsonResposta(['erro' => 'Método não permitido.'], 405);

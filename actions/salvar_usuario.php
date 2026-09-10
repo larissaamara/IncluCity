@@ -10,20 +10,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 if (!csrfValido($_POST['csrf_token'] ?? null)) {
-    http_response_code(403);
-    exit('Solicitação inválida. Atualize a página e tente novamente.');
+    definirMensagemFlash('erro', 'Não foi possível continuar', 'Sua sessão expirou. Atualize a página e tente novamente.');
+    header('Location: ../pages/cadastro.php');
+    exit;
 }
 
 require_once dirname(__DIR__) . '/config/conn.php';
 
 function voltarComErro(string $mensagem): never
 {
-    $mensagemJs = json_encode(
-        $mensagem,
-        JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
-    );
-
-    echo "<script>alert({$mensagemJs}); window.location.href = '../pages/cadastro.php';</script>";
+    definirMensagemFlash('erro', 'Revise os dados', $mensagem);
+    header('Location: ../pages/cadastro.php');
     exit;
 }
 
@@ -128,7 +125,35 @@ try {
     voltarComErro('Não foi possível realizar o cadastro. Tente novamente.');
 }
 
+$usuarioId = (int) $stmt->insert_id;
 $stmt->close();
 $con->close();
 
-echo "<script>alert('Cadastro realizado com sucesso!'); window.location.href = '../pages/login.php';</script>";
+// O cadastro também inicia a sessão para que o usuário siga diretamente
+// para a própria área depois de confirmar o alerta de sucesso.
+session_regenerate_id(true);
+$_SESSION['usuario_id'] = $usuarioId;
+$_SESSION['usuario_nome'] = $nome;
+$_SESSION['usuario_email'] = $email;
+$_SESSION['usuario_celular'] = $celular;
+$_SESSION['usuario_cpf'] = $cpf;
+$_SESSION['tipo_usuario'] = 'usuario';
+
+$emailBoasVindasEnviado = false;
+try {
+    require_once dirname(__DIR__) . '/config/mailer.php';
+    enviarEmailBoasVindas($email, $nome);
+    $emailBoasVindasEnviado = true;
+} catch (Throwable $erro) {
+    error_log('Não foi possível enviar o e-mail de boas-vindas: ' . $erro->getMessage());
+}
+
+definirMensagemFlash(
+    'sucesso',
+    'E-mail cadastrado com sucesso!',
+    $emailBoasVindasEnviado
+        ? "A conta de {$email} foi criada e enviamos uma mensagem de boas-vindas."
+        : "A conta de {$email} foi criada. Você já pode acessar sua área no IncluCity."
+);
+header('Location: ../pages/cadastro.php');
+exit;

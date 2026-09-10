@@ -1,8 +1,10 @@
 <?php
 require_once dirname(__DIR__) . '/config/session.php';
 require_once dirname(__DIR__) . '/config/conn.php';
+require_once dirname(__DIR__) . '/config/mailer.php';
 
 $erro = "";
+$mensagem = "";
 $codigoDesenvolvimento = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["emailCelular"])) {
@@ -27,17 +29,35 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["emailCelular"])) {
             $erro = "Se os dados estiverem cadastrados, um código será enviado.";
         } else {
             $codigo = (string) random_int(100000, 999999);
-            $_SESSION["email_recuperacao"] = $usuario["email"];
-            $_SESSION["codigo_recuperacao_hash"] = password_hash($codigo, PASSWORD_DEFAULT);
-            $_SESSION["codigo_recuperacao_expira"] = time() + 600;
-            $_SESSION["recuperacao_verificada"] = false;
-            $_SESSION['tentativas_codigo'] = 0;
+            $entregaNaTela = ($_ENV['APP_ENV'] ?? '') === 'development'
+                && ($_ENV['RECOVERY_DELIVERY'] ?? '') === 'screen';
 
-            if (($_ENV['APP_ENV'] ?? '') === 'development') {
-                $codigoDesenvolvimento = $codigo;
+            try {
+                if ($entregaNaTela) {
+                    $codigoDesenvolvimento = $codigo;
+                } else {
+                    enviarCodigoRecuperacao($usuario['email'], $codigo);
+                }
+
+                $_SESSION["email_recuperacao"] = $usuario["email"];
+                $_SESSION["codigo_recuperacao_hash"] = password_hash($codigo, PASSWORD_DEFAULT);
+                $_SESSION["codigo_recuperacao_expira"] = time() + 600;
+                $_SESSION["recuperacao_verificada"] = false;
+                $_SESSION['tentativas_codigo'] = 0;
+                $mensagem = $entregaNaTela
+                    ? 'Código de desenvolvimento gerado.'
+                    : 'Código enviado. Verifique sua caixa de entrada e a pasta de spam.';
+            } catch (Throwable $falhaEmail) {
+                error_log('Não foi possível enviar o código de recuperação: ' . $falhaEmail->getMessage());
+                unset(
+                    $_SESSION["email_recuperacao"],
+                    $_SESSION["codigo_recuperacao_hash"],
+                    $_SESSION["codigo_recuperacao_expira"],
+                    $_SESSION["recuperacao_verificada"],
+                    $_SESSION['tentativas_codigo']
+                );
+                $erro = 'Não foi possível enviar o código agora. Tente novamente em alguns minutos.';
             }
-
-            // TODO: enviar $codigo ao e-mail/SMS do usuario em producao.
         }
     }
 } elseif ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["codigo"])) {
@@ -91,6 +111,10 @@ $con->close();
 
     <?php if ($erro !== ""): ?>
       <div class="alert alert-danger" role="alert"><?= htmlspecialchars($erro) ?></div>
+    <?php endif; ?>
+
+    <?php if ($mensagem !== ""): ?>
+      <div class="alert alert-success" role="status"><?= htmlspecialchars($mensagem) ?></div>
     <?php endif; ?>
 
     <?php if ($codigoDesenvolvimento !== ""): ?>

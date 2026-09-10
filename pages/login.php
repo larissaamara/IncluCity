@@ -5,6 +5,7 @@ if (usuarioAutenticado()) {
   header('Location: ' . paginaDaConta());
   exit;
 }
+$mensagemFlash = obterMensagemFlash();
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -15,7 +16,7 @@ if (usuarioAutenticado()) {
   <title>tela de login </title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-  <link rel="stylesheet" href="../assets/css/login.style.css?v=3">
+  <link rel="stylesheet" href="../assets/css/login.style.css?v=4">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
     integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -26,6 +27,15 @@ if (usuarioAutenticado()) {
  
   <div class="container">
     <img class="login-img" src="../assets/img/Imagem1.png" alt="logotipo do login">
+    <?php if ($mensagemFlash): ?>
+      <div class="mensagem mensagem--<?= htmlspecialchars($mensagemFlash['tipo'], ENT_QUOTES, 'UTF-8') ?>" role="status" aria-live="polite">
+        <span class="mensagem__icone" aria-hidden="true">✓</span>
+        <div>
+          <strong><?= htmlspecialchars($mensagemFlash['titulo'], ENT_QUOTES, 'UTF-8') ?></strong>
+          <p><?= htmlspecialchars($mensagemFlash['mensagem'], ENT_QUOTES, 'UTF-8') ?></p>
+        </div>
+      </div>
+    <?php endif; ?>
     <form class="form" action="../actions/autenticar.php" method="POST">
       <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrfToken(), ENT_QUOTES, 'UTF-8') ?>">
       <input
