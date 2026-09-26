@@ -30,6 +30,9 @@ if (!csrfValido($_POST['csrf_token'] ?? null)) {
 */
 
 $login = trim($_POST["login"] ?? "");
+$cpfLogin = preg_match('/^[\d.\-\s]+$/', $login)
+    ? preg_replace('/\D/', '', $login)
+    : '';
 $senha = $_POST["senha"] ?? "";
 
 
@@ -58,11 +61,11 @@ if ($login === "" || $senha === "") {
 
 $sql = "SELECT id, nome, email, celular, cpf, senha, tipo_usuario
         FROM usuarios
-        WHERE email = ? OR cpf = ?";
+        WHERE email = ? OR REPLACE(REPLACE(cpf, '.', ''), '-', '') = NULLIF(?, '')";
 
 $stmt = $con->prepare($sql);
 
-$stmt->bind_param("ss", $login, $login);
+$stmt->bind_param("ss", $login, $cpfLogin);
 
 $stmt->execute();
 
@@ -104,7 +107,7 @@ $usuario = $resultado->fetch_assoc();
 |--------------------------------------------------------------------------
 */
 
-if (!password_verify($senha, $usuario["senha"])) {
+if (!is_string($usuario["senha"]) || !password_verify($senha, $usuario["senha"])) {
 
     echo "<script>
         alert('E-mail, CPF ou senha incorretos.');

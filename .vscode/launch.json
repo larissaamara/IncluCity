@@ -1,0 +1,12 @@
+﻿{
+    "version":  "0.2.0",
+    "configurations":  [
+                           {
+                               "name":  "IncluCity: depurar JavaScript (sem login Google)",
+                               "type":  "msedge",
+                               "request":  "launch",
+                               "url":  "http://localhost/IncluCity/",
+                               "webRoot":  "${workspaceFolder}"
+                           }
+                       ]
+}
