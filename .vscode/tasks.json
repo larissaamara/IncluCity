@@ -1,0 +1,22 @@
+﻿{
+    "version":  "2.0.0",
+    "tasks":  [
+                  {
+                      "label":  "IncluCity: abrir no navegador normal (login Google)",
+                      "type":  "process",
+                      "command":  "powershell.exe",
+                      "args":  [
+                                   "-NoProfile",
+                                   "-Command",
+                                   "Start-Process \u0027http://localhost/IncluCity/\u0027"
+                               ],
+                      "problemMatcher":  [
+
+                                         ],
+                      "group":  {
+                                    "kind":  "build",
+                                    "isDefault":  true
+                                }
+                  }
+              ]
+}

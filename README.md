@@ -32,16 +32,34 @@ Em produção, use no `.env`:
 ```dotenv
 APP_ENV=production
 RECOVERY_DELIVERY=mail
-MAIL_FROM=no-reply@seudominio.com
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_ENCRYPTION=tls
+MAIL_USERNAME=cabrabom.leandro@gmail.com
+MAIL_PASSWORD=sua_senha_de_app
+MAIL_FROM=cabrabom.leandro@gmail.com
+MAIL_FROM_NAME=IncluCity
 ```
 
-O servidor PHP precisa estar configurado para enviar e-mail. Para desenvolvimento local sem SMTP, use `APP_ENV=development` e `RECOVERY_DELIVERY=screen`; nessa combinação o código aparece apenas na página local de recuperação.
+O envio usa PHPMailer com SMTP autenticado. Para uma conta Gmail, ative a verificação em duas etapas e use uma senha de app em `MAIL_PASSWORD`; não use a senha normal da conta. Para desenvolvimento local sem SMTP, use `APP_ENV=development` e `RECOVERY_DELIVERY=screen`; nessa combinação o código aparece apenas na página local de recuperação. O e-mail de boas-vindas continua dependendo do SMTP configurado.
 
 ### Abrir pelo VS Code
 
 Não use a extensão **Live Server** nem abra diretamente um arquivo `.php`: esses modos não executam PHP e exibem o código-fonte na tela.
 
-Com o MySQL do XAMPP ligado, abra a pasta inteira no VS Code e pressione `F5`. A configuração em `.vscode` inicia o servidor PHP e abre `http://localhost:8000` no navegador. Para iniciar apenas o servidor, use `Ctrl+Shift+B`.
+Com Apache e MySQL do XAMPP ligados, abra `http://localhost/IncluCity/` no navegador normal. A tarefa `Ctrl+Shift+B` abre esse endereço. O projeto precisa estar em `C:/xampp/htdocs/IncluCity` ou vinculado a esse caminho por um vínculo de diretório.
+
+Use `F5` apenas para depurar JavaScript. Essa opção abre o Edge com o depurador conectado; o Google pode recusar o login nessa janela com a mensagem “Esse navegador ou app pode não ser seguro”. Para testar o login Google, comece novamente pelo site em uma janela normal do Chrome ou Edge, fora do depurador, sem copiar a URL de autorização da janela anterior.
+
+A depuração usa o Microsoft Edge e o site servido pelo Apache. O Apache aplica as proteções do `.htaccess`.
+
+Alternativa com servidor separado na porta 8000 pelo terminal PowerShell:
+
+```powershell
+& C:/xampp/php/php.exe -S 127.0.0.1:8000 -t . router.php
+```
+
+Para o Apache, use `APP_URL=http://localhost/IncluCity` e `OAUTH_REDIRECT_URI=http://localhost/IncluCity/oauth.php` no `.env`. Cadastre esse mesmo retorno no cliente OAuth do Google. Se optar pelo servidor separado na porta 8000, ajuste ambas as URLs e o retorno autorizado no Google. O servidor separado usa `router.php` porque não interpreta `.htaccess`.
 
 ## Funcionalidades
 

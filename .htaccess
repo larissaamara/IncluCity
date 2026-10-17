@@ -3,6 +3,8 @@ ErrorDocument 404 /IncluCity/pages/errors/404.php
 
 Options -Indexes
 
+RedirectMatch 404 "(?i)^/IncluCity/(?:\.[^/]+|vendor|config|database|tmp|temp|sessions|logs?)(?:/|$)"
+
 <FilesMatch "(?i)(^\.env(?:\..*)?$|\.sql$|^composer\.(json|lock)$)">
     Require all denied
 </FilesMatch>

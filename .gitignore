@@ -35,7 +35,9 @@
 
 # Configuracoes locais de editores e IDEs
 /.idea/
-/.vscode/
+/.vscode/*
+!/.vscode/tasks.json
+!/.vscode/launch.json
 /.fleet/
 *.code-workspace
 *.sublime-project
