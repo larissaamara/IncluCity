@@ -17,6 +17,7 @@ require_once dirname(__DIR__) . '/config/session.php';
   <!-- ICONES -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="../assets/css/telainicial.css">
+  <link rel="stylesheet" href="../assets/css/acessibilidade.css?v=1">
 </head>
 
 
@@ -162,15 +163,15 @@ require_once dirname(__DIR__) . '/config/session.php';
 
     <p>Personalize sua navegação conforme sua necessidade.</p>
 
-    <button class="btn btn-primary">Física</button>
+    <a class="btn btn-primary" href="mapa.php?deficiencia=fisica">Física</a>
 
-    <button class="btn btn-success">Visual</button>
+    <a class="btn btn-success" href="mapa.php?deficiencia=visual">Visual</a>
 
-    <button class="btn btn-warning">Auditiva</button>
+    <a class="btn btn-warning" href="mapa.php?deficiencia=auditiva">Auditiva</a>
 
-    <button class="btn btn-danger">Intelectual</button>
+    <a class="btn btn-danger" href="mapa.php?deficiencia=cognitiva">Intelectual</a>
 
-    <button class="btn btn-dark">Mental</button>
+    <a class="btn btn-dark" href="mapa.php?deficiencia=cognitiva">Psicossocial</a>
 
   </section>
 
@@ -263,7 +264,7 @@ require_once dirname(__DIR__) . '/config/session.php';
   <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
 
   <script>
-    new window.VLibras.Widget('https://vlibras.gov.br/app');
+    if (window.VLibras) new window.VLibras.Widget('https://vlibras.gov.br/app');
   </script>
   <script src="https://freewebaccessible.com/dist/sienna.min.js" defer></script>
 

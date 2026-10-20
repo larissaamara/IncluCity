@@ -24,9 +24,10 @@ if (!$recuperacaoAutorizada && !$usuarioAutenticado) {
     integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
 
+  <link rel="stylesheet" href="../assets/css/acessibilidade.css?v=1">
 </head>
 
-<body onload="mudarposition()">
+<body class="pagina-formulario" onload="mudarposition()">
 
   <div class="container">
     <img class="login-img" src="../assets/img/Imagem1.png" alt="Nova senha">
@@ -88,12 +89,13 @@ if (!$recuperacaoAutorizada && !$usuarioAutenticado) {
 <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
  
 <script>
-  new window.VLibras.Widget('https://vlibras.gov.br/app');
+  if (window.VLibras) new window.VLibras.Widget('https://vlibras.gov.br/app');
 </script>
 <script src="https://freewebaccessible.com/dist/sienna.min.js" defer></script>
 <script>
     function mudarposition() {
       let btnteste = document.querySelector(".asw-menu-btn")
+      if (!btnteste) return;
       btnteste.style.top = "315px";
       btnteste.style.width = "36px";
       btnteste.style.height = "36px"; 

@@ -53,6 +53,7 @@ function escapar(string $valor): string
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <link rel="stylesheet" href="../assets/css/telaUsuario.css">
+  <link rel="stylesheet" href="../assets/css/acessibilidade.css?v=1">
 </head>
 
 <body onload="mudarposition()">
@@ -262,7 +263,7 @@ function escapar(string $valor): string
   <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
 
   <script>
-    new window.VLibras.Widget('https://vlibras.gov.br/app');
+    if (window.VLibras) new window.VLibras.Widget('https://vlibras.gov.br/app');
   </script>
   <script src="https://freewebaccessible.com/dist/sienna.min.js" defer></script>
   <script>

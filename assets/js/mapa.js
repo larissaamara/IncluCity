@@ -537,4 +537,10 @@ document.getElementById('btnFecharConfirmacao').addEventListener('click', () => 
   document.getElementById('confirmacaoSolicitacao').classList.remove('ativa');
   document.getElementById('btnAdicionarLocal').focus();
 });
+// Permite abrir o mapa com a necessidade escolhida na página inicial.
+const deficienciaInicial = new URLSearchParams(window.location.search).get('deficiencia');
+const seletorDeficiencia = document.getElementById('filtroDeficiencia');
+if ([...seletorDeficiencia.options].some(opcao => opcao.value === deficienciaInicial)) {
+  seletorDeficiencia.value = deficienciaInicial;
+}
 carregarLocais();

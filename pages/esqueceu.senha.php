@@ -17,8 +17,9 @@ unset(
   <title>Esqueceu sua senha</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/esqueceu.senha.css">
+  <link rel="stylesheet" href="../assets/css/acessibilidade.css?v=1">
 </head>
-<body>
+<body class="pagina-formulario">
   <div class="container">
     <img class="login-img" src="../assets/img/Imagem1.png" alt="Recuperar senha">
 
@@ -33,7 +34,7 @@ unset(
         required
         autocomplete="username"
       >
-      <button type="submit" class="login-button">Gerar código de recupeção</button>
+      <button type="submit" class="login-button">Gerar código de recuperação</button>
     </form>
   </div>
 </body>

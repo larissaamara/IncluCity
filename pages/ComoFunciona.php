@@ -12,6 +12,7 @@ require_once dirname(__DIR__) . '/config/session.php';
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/comoFunciona.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/acessibilidade.css?v=1">
 </head>
 
 <body onload="mudarposition()">
@@ -174,12 +175,13 @@ require_once dirname(__DIR__) . '/config/session.php';
   <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
 
   <script>
-    new window.VLibras.Widget('https://vlibras.gov.br/app');
+    if (window.VLibras) new window.VLibras.Widget('https://vlibras.gov.br/app');
   </script>
   <script src="https://freewebaccessible.com/dist/sienna.min.js" defer></script>
   <script>
     function mudarposition() {
       let btnteste = document.querySelector(".asw-menu-btn")
+      if (!btnteste) return;
       btnteste.style.top = "315px";
       btnteste.style.width = "36px";
       btnteste.style.height = "36px"; 

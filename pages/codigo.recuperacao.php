@@ -104,8 +104,9 @@ $con->close();
   <title>Código de recuperação</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/codigo.recuperacao.css">
+  <link rel="stylesheet" href="../assets/css/acessibilidade.css?v=1">
 </head>
-<body>
+<body class="pagina-formulario">
   <div class="container">
     <img class="login-img" src="../assets/img/Imagem1.png" alt="Código de recuperação">
 

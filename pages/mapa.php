@@ -15,6 +15,7 @@ $usuarioAutenticado = isset($_SESSION['usuario_id']) && (int) $_SESSION['usuario
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="../assets/css/mapa.css?v=8">
+  <link rel="stylesheet" href="../assets/css/acessibilidade.css?v=1">
 </head>
 
 <body onload="mudarposition()">
@@ -378,13 +379,12 @@ $usuarioAutenticado = isset($_SESSION['usuario_id']) && (int) $_SESSION['usuario
   <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
 
   <script>
-    new window.VLibras.Widget('https://vlibras.gov.br/app');
+    if (window.VLibras) new window.VLibras.Widget('https://vlibras.gov.br/app');
   </script>
   <script src="https://freewebaccessible.com/dist/sienna.min.js" defer></script>
   <script>
     function mudarposition() {
       let btnteste = document.querySelector(".asw-menu-btn")
-      if (!btnteste) return;
       if (!btnteste) return;
       btnteste.style.top = "315px";
       btnteste.style.width = "36px";
